@@ -1,0 +1,48 @@
+
+{% extends 'main/base.html'%}
+
+{% block main_head %}
+
+{% endblock main_head %}
+
+{% block main_body %}
+{% load crispy_forms_tags %}
+{% load static %}
+        <div class="row">
+            <div class="col-md">
+            </div>
+            <div class="col-md-4">
+
+                        {% if messages %}
+                          {% for mess in messages %}
+                          <div class="alert alert-success" role="alert">
+                            {{mess}}
+                          </div>
+                          {% endfor %}
+                        {% endif %}               
+                        <form method="POST">
+                            {% csrf_token %}
+                            <fieldset class="form-group">
+                                <legend class="border-bottom display">
+                                    <h3 class="float-left">Login</h3>
+
+                                <img src="{% static 'main/img/logo.png' %}" class="logo float-right pt-1" width="25">
+                                </legend>
+
+                                {{ form|crispy }}
+                            </fieldset>
+                            <div class="form-grounp">
+                                <button class="btn mainbtn" type="submit">Log In</button>
+                                <small class="float-right text-muted">have't an Account ?<a href="{% url 'signup' %}" class="text-dark"> Signup</a></small>
+
+                            </div>
+
+                        </form>
+               <br>
+           </div>
+           <div class="col-md">
+           </div>
+       </div>
+   
+
+{% endblock main_body %}
