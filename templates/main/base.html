@@ -11,26 +11,53 @@
     <link href="{% static 'main/css/style.css' %}" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script type="text/javascript" src="{% static 'main/js/ajax.js' %}"></script>
+    <script type="text/javascript" src="{% static 'main/js/main.js' %}"></script>
     {% block main_head %}
     {% endblock main_head %}
 </head>
 <body>
     
     <main class="container mt-1 pb-2">
+         {% if messages %}
+             {% for mess in messages %}
+                <div class="alert alert-{{mess.tags}}" role="alert">
+                    {{mess}}
+                </div>
+             {% endfor %}
+         {% endif %} 
+
         {% block main_body %}
         {% endblock main_body %}
     </main>
-
+    <br><br>
     <footer>
             <div class="bottom_nav" id="bottom_nav">
                 <ul>
                     <li><a  href="{% url 'home' %}" class="active"><abbr title="Home"><i class="fa fa-home" aria-hidden="true"></i></abbr></a></li>  
 
-                    <li><a href="#"><abbr title="Search"><i class="fa fa-search" aria-hidden="true" onclick="search()"></i></abbr></a></li>
+                    <li><a href="{% url 'search' %}"><abbr title="Search"><i class="fa fa-search" aria-hidden="true" ></i></abbr></a></li>
 
-                    <li><a><abbr title="profile"><img class="menu" src="{% static 'main/img/default.jpg' %}"></abbr></a></li>
+                    
                     {% if request.user.is_authenticated %}
-                    <li><a  href="#"><abbr title="Notifications"><i class="fa fa-bell" aria-hidden="true"></i></abbr></a></li>
+                    <li><a href="{% url 'profile' request.user.username%}"><abbr title="profile"><img class="menu" src="{{request.user.profile.profile_pic.url}}"></abbr></a></li>
+
+                    <li>
+                        <a  href="#" onclick="showNotifications()"
+                        id=""
+                        data-container="body"
+                        data-toggle="popover" 
+                        data-placement="top" 
+                        data-container="body"
+                        title="Notifications <a href='#' class='float-right pl-1'><small id='clear_notifications'>Clear</small></a>"
+                        data-html="true"
+                        data-content="<div id = 'notifications'>please wait ...</div>"
+                        >
+                            <abbr title="Notifications"><i class="fa fa-bell" aria-hidden="true"></i></abbr>
+                        </a>
+                    </li>
+
+
+
                     <li><a  href="{% url 'logout' %}"><abbr title="Log Out"><i class="fa fa-sign-out" aria-hidden="true"></i></abbr></a></li>
                     {% else %}
                     <li><a  href="{% url 'login' %}"><abbr title="Log In"><i class="fa fa-sign-in" aria-hidden="true"></i></abbr></a></li>
@@ -40,11 +67,11 @@
                 </ul>
             </div>
     </footer>
-
+    <div id = 'followersandfollowings'></div>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
 
     <script type="text/javascript" src="{% static 'main/js/bootstrap.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'main/js/main.js' %}"></script>
+    <script type="text/javascript" src = "{% static 'main/js/notifications.js' %}"></script>
     
 </body>
 </html>

@@ -1,0 +1,47 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block main_head %}
+
+{% endblock main_head %}
+
+{% block main_body %}
+<form method='GET'>
+	<div class="input-group input-group-lg">
+	  <div class="input-group-prepend" style="background-color: #080d2b; border-right: 0;">
+	    <span class="input-group-text" id="inputGroup-sizing-lg" style="background-color: #080d2b; border-right: 0; color: #fff;">Search</span>
+	  </div>
+	  <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-lg" placeholder="Search ..." name="q">
+	  <div class="input-group-append">
+	    <button class="btn mainbtn " type="submit" id="button-addon2"><i class="fa fa-search" aria-hidden="true"></i></button>
+	  </div>
+	</div>
+</form>
+<div class="row" style="justify-content: center;">
+{% for user in users %}
+<div class="card m-1 text-center bg-muted" >
+  <div class="text-center">
+  	<img src="{{user.profile.profile_pic.url}}" class="rounded mt-3" width="100" alt="{{user.username}}">
+  </div>
+  <div class="card-body">
+    <a href="{% url 'profile' user.username %}"><h5 class="card-title p-0 m-0">{{user.get_full_name}}</h5></a>
+    <small class="card-text p-0 m-0">{{user.username}}</small><br>
+    <b class="text-muted">{{user.profile.followers.count}} Followers</b> <br>
+     <button class="followbtn" 
+          {% if user in request.user.profile.following.all %}
+          onclick="Unfollow(this, '{{user}}')"> Unfollow
+          {% else %}
+          onclick="Follow(this, '{{user}}')">
+         
+              {% if user in request.user.profile.followers.all %}
+              Follow Back
+              {% else %}
+              Follow
+              {% endif %}
+             {% endif %}
+            </button>
+  </div>
+</div>
+{% endfor %}
+</div>
+{% endblock main_body %}

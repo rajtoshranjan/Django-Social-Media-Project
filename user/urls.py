@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import signup, resend_otp, login_view
 from django.contrib.auth.views import LoginView, LogoutView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
+from .views import signup, resend_otp, login_view, profile, ChangeIntoProfile, following, followers, notifications, islogin, clear_notifications
 
 
 urlpatterns = [
@@ -27,4 +27,16 @@ urlpatterns = [
 		name="password_reset_complete"),
 
 	path('resendOTP', resend_otp),
+	path('followers', followers),
+	path('following', following),
+	path('notifications', notifications),
+	path('notifications/clear', clear_notifications),
+	path('islogin', islogin),
+
+
+	path('<str:username>', profile, name='profile'),
+	path('change/<str:fieldname>', ChangeIntoProfile),
+
+	
+
 ]

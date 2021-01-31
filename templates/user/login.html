@@ -13,14 +13,7 @@
             </div>
             <div class="col-md-4">
 
-                        {% if messages %}
-                          {% for mess in messages %}
-                          <div class="alert alert-{{mess.tags}}" role="alert">
-                            {{mess}}
-                          </div>
-                          {% endfor %}
-                        {% endif %} 
-
+                       
 
                         {% if otp %}
                           <form method="POST">

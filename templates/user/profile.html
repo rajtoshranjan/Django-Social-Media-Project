@@ -1,0 +1,314 @@
+{% extends 'main/base.html'%}
+{% load crispy_forms_tags %}
+{% load poll_extras %}
+
+{% block main_head %}
+{% load static %}
+	<style>
+        #header {
+
+          height: 200px;
+          background: url({{user.profile.cover_image.url}}?auto=compress&cs=tinysrgb&dpr=1&w=500);
+          background-size: cover;
+          background-position: center center;
+          -webkit-transition: all .08s linear;
+          transition: all .08s linear;
+        }
+    </style>
+    <script type="text/javascript">
+    	function DisplayMenu(btnid) {
+    		ids = ['posts' ,'about', 'changePass']
+    		for(id in ids){
+    			// console.log(ids[id])
+    			if(ids[id] == btnid)
+    			{
+    				document.getElementById(ids[id]).style.display = 'block';
+    				continue;
+    			}
+    			document.getElementById(ids[id]).style.display = 'none';
+    		}
+    	}
+    </script>
+
+{% endblock main_head %}
+
+{% block main_body %}
+<div class="container">
+	<div class="w-100 mt-1">
+        <div id="header">
+          {% if useritself %}
+          <form id="cover_image_form" method='post' action="/user/change/cover_image" enctype="multipart/form-data">
+              {% csrf_token %}
+              <a style="position: absolute; font-size: 30px;" class="btn fa fa-pencil-square" onclick="$('#cover_image').click()"></a>
+              <input type="file" accept="image/*" name="cover_image" id="cover_image" style="visibility: hidden;" onchange="$('#cover_image_form').submit()">
+            </form>
+          {% endif %}
+        </div>
+          <div id="profile">
+            <div class="image">
+            <img src="{{user.profile.profile_pic.url}}" alt="" />
+            {% if useritself %}
+            <form id="profile_pic_form" method='post' action="/user/change/profile_pic" enctype="multipart/form-data">
+              {% csrf_token %}
+              <input type="file" accept="image/*" name="profile_pic" id="profile_pic" style="visibility: hidden;" onchange="$('#profile_pic_form').submit()">
+              <a style="position: absolute; top: 0; right: 4px;" class="btn fa fa-pencil-square p-0" onclick="$('#profile_pic').click()"></a>
+            </form>
+            {% endif %}
+            </div>
+            <div class="name" id="name">
+              {{user.get_full_name}}
+              {% if useritself %}
+                <a class="fa fa-pencil-square" aria-hidden="true" onclick="changeToInput('name', 'text', '/user/change/name')"></a>
+              {% endif %}
+            </div>
+            <div class="nickname">
+              @{{user.username}}
+            </div>
+            <div class="bottom">
+            <span class="following" onclick="getFollowings()">
+              <span class="count" id="following_count">{{user.profile.following.count}}</span>
+              following
+              </span>
+              <span class="followers" onclick="getFollowers()">
+                <span class="count" id="followers_count">{{user.profile.followers.count}}</span>
+                followers
+              </span>
+            </div>
+          </div>
+    </div>
+    <div class="row mt-2">
+    	<div class="col-md-3">
+    		<div class="card">
+          <a class="btn" onclick="DisplayMenu('posts')" href="#posts">Posts</a>
+    			<a class="btn" onclick="DisplayMenu('about')" href="#about">About {{user.first_name}}</a>
+          {% if useritself %}
+    			<a class="btn" onclick="DisplayMenu('changePass')" href="#changePass">Change Password</a>
+          {% endif %}
+    		</div>
+    	</div>
+    	<div class="col-md-9">
+    		<div class="card">
+
+          <!-- Posts of User -->
+          <div id="posts" style="display: block;">
+            <div class="card-body">
+              <h5>
+                Posts of {{user.get_full_name}}
+              </h5>
+                
+                  {% for post in posts %}
+                    <div class="card mb-3" id="post{{post.id}}">
+                      <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <div class="d-flex justify-content-between align-items-center">
+                            <div class="mr-2">
+                              <img class="rounded-circle" width="45" height="45"
+                                src="{{post.user.profile.profile_pic.url}}" alt="">
+                            </div>
+                            <div class="ml-2">
+                              <div class="h5 m-0">{{post.user.get_full_name}}</div>
+                              <div class="text-muted" style="font-size: 0.8rem;">{{post.user.username}}</div>
+                            </div>
+                          </div>
+                          <div>
+                            <div class="dropdown">
+                              <button class="btn btn-link dropdown-toggle" type="button"
+                                id="gedf-drop1" data-toggle="dropdown" aria-haspopup="true"
+                                aria-expanded="false">
+                                <i class="fa fa-ellipsis-h"></i>
+                              </button>
+                              <div class="dropdown-menu dropdown-menu-right"
+                                aria-labelledby="gedf-drop1">
+                                <!-- <div class="h6 dropdown-header">Configuration</div> -->
+                                {% if post.user == request.user %}
+                                <!-- <a class="dropdown-item" >Edit</a> -->
+                                <a class="dropdown-item" onclick="Post('delete',
+                                  '{{post.id}}')">Delete</a>
+                                {% endif %}
+                                <!-- <a class="dropdown-item">Hide</a> -->
+                                <a class="dropdown-item">Report</a>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+                      <div class="card-body">
+                        <div class="text-muted h7 mb-2"> <i class="fa fa-clock-o"></i>
+                          {{post.created_at|timesince}} ago</div>
+
+                        <p class="card-text">
+                          {{post.text}}
+                        </p>
+                        {% if post.picture %}
+                        <img src="{{post.picture.url}}" class="w-100 img-fluid">
+                        {% endif %}
+                        <small class="text-muted pull-right">
+                          <b class="likes">{{post.likes.count}}</b> Likes &nbsp;
+                          <b class="dislikes">{{post.dislikes.count}}</b> Dislikes
+                        </small>
+                      </div>
+
+                      <div class="card-footer d-flex justify-content-center">
+                        <p
+                          {% if request.user in post.likes.all %}
+                          class="card-link m-auto like_active click" onclick="Post('like-back',
+                          '{{post.id}}')"
+                          {% else %}
+                          class="card-link m-auto click" onclick="Post('like', '{{post.id}}')"
+                          {% endif %}>
+
+                          <i class="fa fa-gittip"></i> Like</p>
+
+
+                        <p
+                          {% if request.user in post.dislikes.all %}
+                          class="card-link m-auto like_active click"
+                          onclick="Post('dislike-back', '{{post.id}}')"
+                          {% else %}
+                          class="card-link m-auto click" onclick="Post('dislike',
+                          '{{post.id}}')"
+                          {% endif %}><i class="fa fa-thumbs-down"></i> Dislike</p>
+
+                        <a class="card-link m-auto click" data-toggle="collapse"
+                          data-target="#post{{post.id}}comments" aria-expanded="false"
+                          aria-controls="post{{post.id}}comments"><i class="fa fa-comment"></i>
+                          Comment</a>
+                      </div>
+                      <div class="collapse" id="post{{post.id}}comments">
+                        <div class="card" style="border:none">
+                          <div class="card-body" id="comments_of_post{{post.id}}" style="max-height: 300px; overflow-y: scroll;
+                            background-color: #f7f7f7;">
+                            {% for comment in post.id|comments %}
+                            <div class="media">
+                              <img src="{{comment.0.user.profile.profile_pic.url}}" width="40" height="40" alt="..." class="img-thumbnail rounded mr-3">
+                              <div class="media-body">
+                                <b>{{comment.0.user.get_full_name}}</b>
+                                <p style="font-size: 13px;">{{comment.0.comm}}</p>
+                                <div id="comment{{comment.0.id}}">
+                                  <button class="btn-sm mainbtn"  
+                                  onclick="CommentReplyForm('comment{{comment.0.id}}',
+                                   '{{comment.0.id}}', 
+                                   '{{request.user.profile.profile_pic.url}}')">Reply</button>
+                                </div>
+                                <div id="comment{{comment.0.id}}replys">
+                                {% for subcomment in comment.1 %}
+                                <div class="media mt-3">
+                                  <a class="mr-3" href="#">
+                                    <img src="{{subcomment.user.profile.profile_pic.url}}" width="40" height="40" alt="..." class="img-thumbnail rounded">
+                                  </a>
+                                  <div class="media-body">
+                                    <b>{{subcomment.user.get_full_name}}</b>
+                                    <p style="font-size: 13px;">{{subcomment.comm}}</p>
+                                  </div>
+                                </div>
+                                {% endfor %}
+                              </div>
+                              </div>
+                            </div>
+                            {% endfor %}
+                          </div>
+                          <form class="card-footer p-0 m-0 input-group" style="border:none;">
+                            <div class="input-group-prepend rounded-0">
+                              <span class="input-group-text" style="border-radius:0">
+                                <img class="rounded-circle" width="20" height="20"
+                                  src="{{post.user.profile.profile_pic.url}}" alt="">
+                              </span>
+                            </div>
+                            <input type="text" class="form-control" aria-label="Write a Comment"
+                              placeholder="Write a Comment" id="comment_text_of_{{post.id}}">
+                            <div class="input-group-append">
+                              <button class="input-group-text btn" type="button" 
+                              onclick="addComment('{{post.id}}',
+                               'comment_text_of_{{post.id}}', 'comments_of_post{{post.id}}')"><i class="fa fa-paper-plane"
+                                  aria-hidden="true"></i></button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                    {% endfor %}
+                    <div class="float-right">
+                      <nav aria-label="Page navigation example">
+                        <ul class="pagination">
+                          {% if posts.has_previous %}
+                          <li class="page-item">
+                            <a class="page-link" href="?page={{posts.previous_page_number}}"
+                              aria-label="Previous">
+                              <span aria-hidden="true">&laquo;</span>
+                            </a>
+                          </li>
+                          {% endif %}
+                          <li class="page-item"><a class="page-link" href="#">{{posts.number}}</a></li>
+                          {% if posts.has_next %}
+                          <li class="page-item">
+                            <a class="page-link" href="?page={{posts.next_page_number}}"
+                              aria-label="Next">
+                              <span aria-hidden="true">&raquo;</span>
+                            </a>
+                          </li>
+                          {% endif %}
+                        </ul>
+                      </nav>
+                    </div>
+
+        </div>  
+
+            </div>
+          
+
+          <!-- About user -->
+    			<div id="about" style="display: none;">
+	    			<div class="card-body">
+	    				<h5>
+	    					About Me 
+
+                {% if useritself %}
+	    					<a class="fa fa-pencil-square" aria-hidden="true" onclick="changeToInput('aboutme', 'text', '/user/change/aboutme')"></a>
+                {% endif %}
+	    				</h5>
+	    				<p class="pl-2 text-muted" id="aboutme">{{user.profile.about_me}}
+	    				</p>
+	    				<div class=" row">
+	    					<div class="col-md-6">
+	    						<h5>
+                    Date of Birth
+                    {% if useritself %}
+                    <a class="fa fa-pencil-square" aria-hidden="true" onclick="changeToInput('dob', 'date', '/user/change/dob')"></a>
+                    {% endif %}
+                  </h5>
+	    						<p class="pl-2 text-muted" id="dob">{{user.profile.birthday}}</p>
+	    					</div>
+                <div class="col-md-6">
+                  <h5>
+                    Gender
+                    {% if useritself %}
+                    <a class="fa fa-pencil-square" aria-hidden="true" onclick="changeToInput('gender', 'radio', '/user/change/gender')"></a>
+                    {% endif %}
+                  </h5>
+                  <p class="pl-2 text-muted" id="gender">{{user.profile.gender}}</p>
+
+                </div>
+	    				</div>
+	    			</div>
+    			
+    			</div>
+
+          <!-- Change Password -->
+          {% if useritself %}
+    			<div id="changePass" style="display: none;">
+    				<form method="post" class="card-body">
+    					{% csrf_token %}
+    					{{passChangeForm | crispy}}
+    					<button class="btn mainbtn">Change Password</button>
+    				</form>
+    				
+          </div>
+          {% endif %}
+    			</div>
+    		</div>
+    	</div>
+    </div>
+</div>
+
+{% endblock main_body %}
