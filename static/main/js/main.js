@@ -138,11 +138,11 @@ const getFollowers = () =>{
             f_elm += `
             <div class="card mb-1" style="max-width: 540px;">
               <div class="row no-gutters">
-                <div class="col-md-3 text-center align-items-center d-flex" style="">
+                <div class="col-3 text-center align-items-center d-flex" style="">
                   <a href="/user/${data[i].username}" class="m-auto">
                   <img src=${data[i].pic} class="card-img m-auto" style="width: 49px" ></a>
                 </div>
-                <div class="col-md-9">
+                <div class="col-9">
                   <div class="card-body p-0 mb-1 mt-1">
                     <a href="/user/${data[i].username}"><b class="card-title">${data[i].first_name} ${data[i].last_name}</b></a><br>
                     ${btn}
@@ -190,11 +190,11 @@ const getFollowings = () =>{
             f_elm += `
             <div class="card mb-1" style="max-width: 540px;">
               <div class="row no-gutters">
-                <div class="col-md-3 text-center align-items-center d-flex" style="">
+                <div class="col-3 text-center align-items-center d-flex" style="">
                   <a href="/user/${data[i].username}" class="m-auto">
                   <img src=${data[i].pic} class="card-img m-auto" style="width: 49px" ></a>
                 </div>
-                <div class="col-md-9">
+                <div class="col-9">
                   <div class="card-body p-0 mb-1 mt-1">
                     <a href="/user/${data[i].username}"><b class="card-title">${data[i].first_name} ${data[i].last_name}</b></a><br>
                     <button class="followbtn" onclick="Unfollow(this, '${data[i].username}')">
